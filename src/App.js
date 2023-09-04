@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
-import Web3 from 'web3';
+import QRCode from 'react-qr-code';
 
 function App() {
   const [isBuying, setIsBuying] = useState(false);
@@ -11,14 +11,33 @@ function App() {
   const [quotation, setQuotation] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isQuoting, setIsQuoting] = useState(false);
-
-  const urlBase = 'https://api-sandbox.bembit.com/api/v1';
+  const [pixQrCode, setPixQrCode] = useState('');
+  const [brCode, setBrCode] = useState('');
+  const [criptoQrCode, setCriptoQrCode] = useState('');
+  const [payment, setPayment] = useState({
+    amount: '',
+    currency: '',
+    expiresAt: '',
+    id: '',
+    payment: {
+      amountHumanized: '',
+      walletToTransfer: '',
+    },
+  });
 
   //campos do form
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [document, setDocument] = useState('');
   const [selectedToken, setSelectedToken] = useState({ symbol: 'default' });
-  const [network, setNetwork] = useState('56');
+  const [network, setNetwork] = useState(56);
+
+  const networkNames = {
+    10: 'Optimism',
+    56: 'BSC',
+    137: 'Polygon',
+    42161: 'Arbitrum',
+  };
 
   const handleSelectCoin = (e) => {
     const sel = e.target.value;
@@ -27,24 +46,85 @@ function App() {
     if (token.symbol === 'default') return;
 
     setSelectedToken(token[0]);
+    setNetwork(token[0].networks[0].id);
+  };
 
-    if (token[0].networks.length > 1) {
-      setNetwork(token[0].networks[0].id);
-      console.log('Primera red:', token[0].networks[0].id);
-    } else {
-      setNetwork(token[0].networks[0].id);
-      console.log('Unica red', token[0].networks[0].id);
+  const handlePixPayment = async () => {
+    setPaymentMethod('PIX');
+
+    const data = {
+      network: 56,
+      currency: 'BRL',
+      amount: 2000,
+      requester: {
+        name: 'Nome de exemplo',
+        email: 'emailDeTeste@teste.com',
+        document: '546.446.830-78',
+      },
+    };
+
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_BASE_URI}/orders/${process.env.REACT_APP_CHECKOUT_ID}/checkout`,
+        data
+      );
+      const qrURI = res.data.payment.qrCode;
+      const brURI = res.data.payment.brCode;
+
+      setBrCode(brURI);
+      setPixQrCode(qrURI);
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const handleSubmit = (e) => {
+  const generateCriptoQrCode = async () => {};
+
+  const handleCriptoPayment = async (e) => {
     e.preventDefault();
+
+    const data = {
+      network: network,
+      currency: selectedToken.symbol,
+      amount: 1000,
+      requester: {
+        name: name,
+        email: email,
+        document: document,
+      },
+    };
+
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_BASE_URI}/orders/${process.env.REACT_APP_CHECKOUT_ID}/checkout`,
+        data
+      );
+
+      setPayment(res.data);
+      console.log(res.data);
+
+      // generateCriptoQrCode()
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getTokenList = async () => {
     try {
-      const res = await axios.get(`${urlBase}/quotation/tokens/network/56`);
-      setCoinList(res.data);
+      const res = await axios.get(
+        // `${process.env.REACT_APP_BASE_URI}/quotation/tokens/network/${parseInt(network)}`
+        `${process.env.REACT_APP_BASE_URI}/quotation/tokens/network/137`
+      );
+
+      const sortedTokens = res.data.sort((a, b) => {
+        return a.symbol.localeCompare(b.symbol);
+      });
+
+      const filteredTokens = sortedTokens.filter((token) => {
+        return token.networks.some((network) => network.id === 56);
+      });
+
+      setCoinList(filteredTokens);
     } catch (error) {
       console.log(error);
     }
@@ -61,14 +141,17 @@ function App() {
     setIsQuoting(true);
 
     const data = {
-      network: Number(network),
+      network: network,
       from: 'BRL',
       to: selectedToken.symbol,
       amount: 10000,
     };
 
     try {
-      const res = await axios.post(`${urlBase}/quotation`, data);
+      const res = await axios.post(
+        `${process.env.REACT_APP_BASE_URI}/quotation`,
+        data
+      );
       setQuotation(res.data.toTokenAmount);
       setIsQuoting(false);
     } catch (error) {
@@ -129,7 +212,7 @@ function App() {
           <button onClick={() => setPaymentMethod('Cripto')}>
             Pagar com Criptomoedas
           </button>
-          <button onClick={() => setPaymentMethod('PIX')}>Pagar com PIX</button>
+          <button onClick={handlePixPayment}>Pagar com PIX</button>
           <button
             onClick={() => {
               setPaymentMethod('');
@@ -141,15 +224,15 @@ function App() {
         </>
       )}
 
-      {isBuying && paymentMethod === 'Cripto' && (
+      {isBuying && paymentMethod === 'Cripto' && payment.id === '' && (
         <div>
           <h2>Você está comprando:</h2>
           <h3>Producto: 1 x DC Shoes</h3>
           <h3>
             Valor: <strong>R$</strong>100,00
           </h3>
-          <form onSubmit={handleSubmit} encType="multipart/form-data">
-            {/* <label htmlFor="name">Nome: </label>
+          <form onSubmit={handleCriptoPayment} encType="multipart/form-data">
+            <label htmlFor="name">Nome: </label>
             <input
               type="text"
               id="name"
@@ -168,13 +251,28 @@ function App() {
               placeholder="Digite seu email"
             />
             <br />
-            <br /> */}
+            <br />
+            <label htmlFor="email">CPF: </label>
+            <input
+              type="document"
+              id="document"
+              value={document}
+              onChange={(e) => setDocument(e.target.value)}
+              placeholder="Digite seu cpf"
+            />
+            <br />
+            <br />
             <label htmlFor="selectValue">Escolha o token: </label>
             <select
               id="selectValue"
               value={selectedToken.symbol || '---'}
               onChange={handleSelectCoin}
-              style={{paddingLeft: "1em", paddingRight: "1em", paddingTop: "0.5em", paddingBottom: "0.5em"}}
+              style={{
+                paddingLeft: '1em',
+                paddingRight: '1em',
+                paddingTop: '0.5em',
+                paddingBottom: '0.5em',
+              }}
             >
               <option value="default" disabled>
                 Seleccione un token
@@ -191,18 +289,18 @@ function App() {
                 {selectedToken.symbol !== 'default' &&
                 selectedToken['networks'].length > 1 ? (
                   <>
-                    <h3>Escolha a rede:</h3>
+                    <h3>Blockchain: {network}</h3>
+                    <h3>Trocar a rede:</h3>
                     {selectedToken.networks.map((n) => (
                       <button
                         onClick={handleSelectNetwork}
+                        key={n.id}
                         style={{
                           padding: '10px',
                           marginLeft: '5px',
-                          background: network === n.id && '#2d7bcf',
-                          color: network === n.id && '#fff',
                         }}
                       >
-                        {n.id}
+                        {networkNames[n.id]}
                       </button>
                     ))}
                   </>
@@ -254,9 +352,44 @@ function App() {
           </button>
         </div>
       )}
-      {/* {
-        isBuying && paymentMethod === 'Cripto' && ()
-      } */}
+      {isBuying && paymentMethod === 'PIX' && (
+        <div style={{ width: '30%', overflowX: 'hidden' }}>
+          <h1>Tela de Pagamento</h1>
+          <h4>Use seu celular para escanear o QR Code.</h4>
+          <img src={pixQrCode} />
+          <p>
+            <strong>brCode:</strong> {brCode}
+          </p>
+          <button
+            onClick={() => {
+              setPaymentMethod('');
+              setIsBuying(false);
+            }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+      {payment.id !== '' && (
+        <>
+          <h2>Tela de Pagamento por Criptomoedas</h2>
+          <h3>
+            Voce esta pagando {payment.payment.amountHumanized}{' '}
+            {payment.currency}
+          </h3>
+          <QRCode size={152} value={payment.payment.walletToTransfer} />
+          <button
+            style={{ marginTop: '1em' }}
+            onClick={() => {
+              setPaymentMethod('');
+              setPayment({ id: '' });
+              setIsBuying(false);
+            }}
+          >
+            Cancelar
+          </button>
+        </>
+      )}
     </div>
   );
 }
