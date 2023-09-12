@@ -13,7 +13,6 @@ function App() {
   const [isQuoting, setIsQuoting] = useState(false);
   const [pixQrCode, setPixQrCode] = useState('');
   const [brCode, setBrCode] = useState('');
-  const [criptoQrCode, setCriptoQrCode] = useState('');
   const [payment, setPayment] = useState({
     amount: '',
     currency: '',
@@ -49,6 +48,7 @@ function App() {
     setNetwork(token[0].networks[0].id);
   };
 
+  // Cria um invoice para pagamento por PIX com o Link de pagamento.
   const handlePixPayment = async () => {
     setPaymentMethod('PIX');
 
@@ -71,6 +71,8 @@ function App() {
       const qrURI = res.data.payment.qrCode;
       const brURI = res.data.payment.brCode;
 
+      console.log(res)
+
       setBrCode(brURI);
       setPixQrCode(qrURI);
     } catch (error) {
@@ -78,8 +80,7 @@ function App() {
     }
   };
 
-  const generateCriptoQrCode = async () => {};
-
+  // Cria um invoice para pagamento por Cripto com o Link de pagamento.
   const handleCriptoPayment = async (e) => {
     e.preventDefault();
 
@@ -109,10 +110,10 @@ function App() {
     }
   };
 
+  // Devolve a lista dos tokens disponiveis.
   const getTokenList = async () => {
     try {
       const res = await axios.get(
-        // `${process.env.REACT_APP_BASE_URI}/quotation/tokens/network/${parseInt(network)}`
         `${process.env.REACT_APP_BASE_URI}/quotation/tokens/network/137`
       );
 
@@ -135,6 +136,7 @@ function App() {
     setNetwork(e.target.innerText);
   };
 
+  // Gerando uma cotação.
   const retrieveQuote = async () => {
     if (selectedToken.symbol === 'default') return;
 
@@ -353,10 +355,10 @@ function App() {
         </div>
       )}
       {isBuying && paymentMethod === 'PIX' && (
-        <div style={{ width: '30%', overflowX: 'hidden' }}>
+        <div style={{ width: '30%'}}>
           <h1>Tela de Pagamento</h1>
           <h4>Use seu celular para escanear o QR Code.</h4>
-          <img src={pixQrCode} />
+          <img src={pixQrCode} referrerpolicy="no-referrer" width="350px"></img>
           <p>
             <strong>brCode:</strong> {brCode}
           </p>
