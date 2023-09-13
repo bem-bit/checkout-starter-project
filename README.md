@@ -27,10 +27,17 @@ Mudar o arquivo **.env.** template a **.env** e preencher com as variaveis de en
 
 ### Variaveis de entorno:
 
-- **REACT_APP_API_KEY**: _String_ aleatório gerado na sua conta cadastrada, na opção "**API KEYS**" do menu lateral.
-- **REACT_APP_API_SECRET**: _String_ aleatório gerado na sua conta cadastrada, na opção "**API KEYS**" do menu lateral.
-- **REACT_APP_BASE_URI**: Utilzar ***https://api-sandbox.bembit.com/api/v1*** para testes e ***https://api.bembit.com/api/v1*** em Produção.
-- **REACT_APP_CHECKOUT_ID**: String identificador do link de pagamento criado desde sua conta na app.bembit.com
+- **REACT_APP_API_KEY**:
+_String_ aleatório gerado na sua conta cadastrada, na opção "**API KEYS**" do menu lateral.
+
+- **REACT_APP_API_SECRET**:
+_String_ aleatório gerado na sua conta cadastrada, na opção "**API KEYS**" do menu lateral.
+
+- **REACT_APP_BASE_URI**:
+Utilzar ***https://api-sandbox.bembit.com/api/v1*** para testes e ***https://api.bembit.com/api/v1*** em Produção.
+
+- **REACT_APP_CHECKOUT_ID**:
+String identificador do link de pagamento criado desde sua conta na app.bembit.com
 
 ### Para iniciar o app
 ```shell
@@ -105,4 +112,37 @@ const handleCriptoPayment = async (e) => {
       console.log(error);
     }
   };
+```
+
+
+Ao ser gerado o QR Code do pagamento, é chamada a função para atrelar o pagamento aos webhooks para o acompanhamento dos eventos relativos ao pagamento como são, **SWAP_STARTED**, **SWAP_PAYMENT_IDENTIFIED**, **SWAP_PAYMENT_EXPIRED**, **SWAP_PAYMENT_BLOCKED**, **SWAP_COMPLETED** e **SWAP_FAILED**. 
+
+Para mais detalhes sobre a integração de _Webhooks_ visite a nossa <a href="https://docs.bembit.com/ordens/cryptoPix" target="_blank">documentação.</a>
+
+```javascript
+const linkWebhookToCheckout = async(checkoutId) => {
+
+    const headers = {
+      'accept': '*/*',
+      'api': process.env.REACT_APP_API_KEY,
+      'secret': process.env.REACT_APP_API_SECRET,
+      'Content-Type': 'application/json'
+  }
+    
+    const data = {
+      "url": "[o URI do seu endpoint webhook]",
+      "headers": [
+        {
+          "sua-chave": "seu-valor", // Deixar exatamente igual.
+        }
+      ]
+    }
+
+    try {
+      const res = await axios.post(`${process.env.REACT_APP_BASE_URI}/checkouts/${checkoutId}/webhooks`, data, { headers });
+      console.log('Attach webhooks', res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 ```
