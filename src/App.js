@@ -49,31 +49,35 @@ function App() {
   };
 
   // Atrelar webhooks a um link de pagamento
-  const linkWebhookToCheckout = async(checkoutId) => {
-
+  const linkWebhookToCheckout = async (checkoutId) => {
     const headers = {
-      'accept': '*/*',
-      'api': process.env.REACT_APP_API_KEY,
-      'secret': process.env.REACT_APP_API_SECRET,
-      'Content-Type': 'application/json'
-  }
-    
+      accept: '*/*',
+      api: process.env.REACT_APP_API_KEY,
+      secret: process.env.REACT_APP_API_SECRET,
+      'Content-Type': 'application/json',
+    };
+
     const data = {
       "url": "https://webhook.site/7a99f181-a306-427e-9fe1-9c8c4d4f767c",
       "headers": [
         {
-          "sua-chave": "seu-valor", //
+          "sua-chave": "seu-valor"
         }
       ]
     }
+    
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_BASE_URI}/checkouts/${checkoutId}/webhooks`, data, { headers });
-      console.log('Attach webhooks', res.data)
+      const res = await axios.post(
+        `${process.env.REACT_APP_BASE_URI}/checkouts/${checkoutId}/webhooks`,
+        data,
+        { headers }
+      );
+      console.log('Webhooks subscribed', res);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   // Cria um invoice para pagamento por PIX com o Link de pagamento.
   const handlePixPayment = async () => {
@@ -100,13 +104,11 @@ function App() {
 
       setBrCode(brURI);
       setPixQrCode(qrURI);
-      linkWebhookToCheckout(process.env.REACT_APP_CHECKOUT_ID)
+      linkWebhookToCheckout(process.env.REACT_APP_CHECKOUT_ID);
     } catch (error) {
       console.log(error);
     }
   };
-
-  
 
   // Cria um invoice para pagamento por Cripto com o Link de pagamento.
   const handleCriptoPayment = async (e) => {
@@ -130,7 +132,7 @@ function App() {
       );
 
       setPayment(res.data);
-      linkWebhookToCheckout(process.env.REACT_APP_CHECKOUT_ID)
+      linkWebhookToCheckout(process.env.REACT_APP_CHECKOUT_ID);
     } catch (error) {
       console.log(error);
     }
@@ -381,20 +383,27 @@ function App() {
         </div>
       )}
       {isBuying && paymentMethod === 'PIX' && (
-        <div style={{ width: '43%'}}>
+        <div style={{ width: '43%' }}>
           <h1>Tela de Pagamento</h1>
           <h4>Use seu celular para escanear o QR Code.</h4>
-          {
-            !pixQrCode ? <p>Carregando...</p> : <img src={pixQrCode} referrerPolicy="no-referrer" width="350px"></img>
-          }
+          {!pixQrCode ? (
+            <p>Carregando...</p>
+          ) : (
+            <img
+              src={pixQrCode}
+              referrerPolicy="no-referrer"
+              width="350px"
+            ></img>
+          )}
           <p>
-            <strong>brCode:</strong> {brCode.substring(0,6)}...{brCode.substring(142,)}
+            <strong>brCode:</strong> {brCode.substring(0, 6)}...
+            {brCode.substring(142)}
           </p>
           <button
             onClick={() => {
               setPaymentMethod('');
               setIsBuying(false);
-              setPixQrCode(null)
+              setPixQrCode(null);
             }}
           >
             Cancelar
