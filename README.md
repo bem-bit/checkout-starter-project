@@ -5,7 +5,7 @@
 
 Este projeto serve como um modelo ilustrativo para a integração com os pontos de extremidade (EndPoints) da API da Bembit. Ele contém a implementação fundamental dos procedimentos necessários para a geração e gerenciamento de transações de pagamento e cobrança. Essa implementação foi desenvolvida para simplificar o processo de integração com qualquer sistema que demande uma solução para gateway de pagamento. O objetivo é oferecer uma base sólida para o desenvolvimento de integrações mais complexas, permitindo assim uma adoção mais rápida e eficiente da API da Bembit como mecanismo de transação financeira.
 
-Para informações mais detalhadas consulte a nossa <a href="https://docs.bembit.com" target="_blank">Documentação</a>, ou se preferir pode testar cada um dos EndPoints no <a href="https://api.bembit.com/docs/" target="_blank">Swagger</a>.
+> 📑 Para informações mais detalhadas consulte a nossa <a href="https://docs.bembit.com" target="_blank">Documentação</a>, ou se preferir pode testar cada um dos EndPoints no <a href="https://api.bembit.com/docs/" target="_blank">Swagger</a>.
 
 ### Instalação:
 ```shell
@@ -80,6 +80,7 @@ const handlePixPayment = async () => {
     }
   };
 ```
+> Para mais detalhes sobre a geração de cobranças via _PUX_ visite a nossa <a href="https://docs.bembit.com/ordens/cryptoPix" target="_blank">documentação.</a>
 
 Se o cliente escolher pagamento por Cripto, a request é construida assim:
 
@@ -113,11 +114,11 @@ const handleCriptoPayment = async (e) => {
     }
   };
 ```
+> Para mais detalhes sobre a geração de cobranças via _cripto_ visite a nossa <a href="https://docs.bembit.com/ordens/paymentLinkOrder" target="_blank">documentação.</a>
 
 
 Ao ser gerado o QR Code do pagamento, é chamada a função para atrelar o pagamento aos webhooks para o acompanhamento dos eventos relativos ao pagamento como são, **SWAP_STARTED**, **SWAP_PAYMENT_IDENTIFIED**, **SWAP_PAYMENT_EXPIRED**, **SWAP_PAYMENT_BLOCKED**, **SWAP_COMPLETED** e **SWAP_FAILED**. 
 
-Para mais detalhes sobre a integração de _Webhooks_ visite a nossa <a href="https://docs.bembit.com/ordens/cryptoPix" target="_blank">documentação.</a>
 
 ```javascript
 const linkWebhookToCheckout = async(checkoutId) => {
@@ -146,3 +147,6 @@ const linkWebhookToCheckout = async(checkoutId) => {
     }
   }
 ```
+> Para mais detalhes sobre a integração de _Webhooks_ visite a nossa <a href="https://docs.bembit.com/ordens/cryptoPix#webhooks" target="_blank">documentação.</a>
+
+> ⚠️ **ATENÇÃO**: Essa funcionalidade encontra-se disponível apenas em ambiente de homologação (sandbox), em breve estará disponível no ambiente de produção.
