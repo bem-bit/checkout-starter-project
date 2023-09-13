@@ -48,6 +48,33 @@ function App() {
     setNetwork(token[0].networks[0].id);
   };
 
+  // Atrelar webhooks a um link de pagamento
+  const linkWebhookToCheckout = async(checkoutId) => {
+
+    const headers = {
+      'accept': '*/*',
+      'api': process.env.REACT_APP_API_KEY,
+      'secret': process.env.REACT_APP_API_SECRET,
+      'Content-Type': 'application/json'
+  }
+    
+    const data = {
+      "url": "https://webhook.site/7a99f181-a306-427e-9fe1-9c8c4d4f767c",
+      "headers": [
+        {
+          "sua-chave": "seu-valor", //
+        }
+      ]
+    }
+
+    try {
+      const res = await axios.post(`${process.env.REACT_APP_BASE_URI}/checkouts/${checkoutId}/webhooks`, data, { headers });
+      console.log('Attach webhooks', res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Cria um invoice para pagamento por PIX com o Link de pagamento.
   const handlePixPayment = async () => {
     setPaymentMethod('PIX');
@@ -71,21 +98,22 @@ function App() {
       const qrURI = res.data.payment.qrCode;
       const brURI = res.data.payment.brCode;
 
-      console.log(res)
-
       setBrCode(brURI);
       setPixQrCode(qrURI);
+      linkWebhookToCheckout(process.env.REACT_APP_CHECKOUT_ID)
     } catch (error) {
       console.log(error);
     }
   };
+
+  
 
   // Cria um invoice para pagamento por Cripto com o Link de pagamento.
   const handleCriptoPayment = async (e) => {
     e.preventDefault();
 
     const data = {
-      network: network,
+      network: parseInt(network),
       currency: selectedToken.symbol,
       amount: 1000,
       requester: {
@@ -102,9 +130,7 @@ function App() {
       );
 
       setPayment(res.data);
-      console.log(res.data);
-
-      // generateCriptoQrCode()
+      linkWebhookToCheckout(process.env.REACT_APP_CHECKOUT_ID)
     } catch (error) {
       console.log(error);
     }
@@ -355,17 +381,20 @@ function App() {
         </div>
       )}
       {isBuying && paymentMethod === 'PIX' && (
-        <div style={{ width: '30%'}}>
+        <div style={{ width: '43%'}}>
           <h1>Tela de Pagamento</h1>
           <h4>Use seu celular para escanear o QR Code.</h4>
-          <img src={pixQrCode} referrerpolicy="no-referrer" width="350px"></img>
+          {
+            !pixQrCode ? <p>Carregando...</p> : <img src={pixQrCode} referrerPolicy="no-referrer" width="350px"></img>
+          }
           <p>
-            <strong>brCode:</strong> {brCode}
+            <strong>brCode:</strong> {brCode.substring(0,6)}...{brCode.substring(142,)}
           </p>
           <button
             onClick={() => {
               setPaymentMethod('');
               setIsBuying(false);
+              setPixQrCode(null)
             }}
           >
             Cancelar
