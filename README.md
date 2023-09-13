@@ -34,7 +34,7 @@ _String_ aleatório gerado na sua conta cadastrada, na opção "**API KEYS**" do
 _String_ aleatório gerado na sua conta cadastrada, na opção "**API KEYS**" do menu lateral.
 
 - **REACT_APP_BASE_URI**:
-Utilzar ***https://api-sandbox.bembit.com/api/v1*** para testes e ***https://api.bembit.com/api/v1*** em Produção.
+Utilzar: <br />> ***https://api-sandbox.bembit.com/api/v1*** para testes<br />> ***https://api.bembit.com/api/v1*** em Produção.
 
 - **REACT_APP_CHECKOUT_ID**:
 String identificador do link de pagamento criado desde sua conta na app.bembit.com
@@ -80,7 +80,7 @@ const handlePixPayment = async () => {
     }
   };
 ```
-> Para mais detalhes sobre a geração de cobranças via _PUX_ visite a nossa <a href="https://docs.bembit.com/ordens/cryptoPix" target="_blank">documentação.</a>
+> Para mais detalhes sobre a geração de cobranças via _PIX_ visite a nossa <a href="https://docs.bembit.com/ordens/cryptoPix" target="_blank">documentação.</a>
 
 Se o cliente escolher pagamento por Cripto, a request é construida assim:
 
