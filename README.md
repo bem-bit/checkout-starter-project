@@ -25,7 +25,7 @@ yarn
 
 Mudar o arquivo **.env.** template a **.env** e preencher com as variaveis de entorno. 
 
-### Variaveis de entorno:
+### Variaveis de ambiente:
 
 - **REACT_APP_API_KEY**:
 _String_ aleatório gerado na sua conta cadastrada, na opção "**API KEYS**" do menu lateral.
