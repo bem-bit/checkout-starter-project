@@ -23,7 +23,9 @@ yarn
 
 ### Configuração:
 
-Mudar o arquivo **.env.** template a **.env** e preencher com as variaveis de entorno. 
+## ⚠️ **Atenção:** A criação de um link de pagamento é de caráter ***primordial*** para o funcionamento dessa app.
+
+Mudar o arquivo **.env.template** para **.env** e preencher com as variaveis de entorno. 
 
 ### Variaveis de ambiente:
 
